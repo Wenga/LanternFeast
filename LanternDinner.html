@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#3b0006" />
+  <title>灯影食宴 · 元宵聚餐 | Lantern Feast Menu</title>
+
+  <style>
+    :root{
+      --gold:#ffef9a;
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --radius: 18px;
+
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+      --safe-left: env(safe-area-inset-left);
+      --safe-right: env(safe-area-inset-right);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+                   "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+      color: var(--text);
+
+      /* ✅ 红色纹理背景 */
+      background: #240004 url("bg-red-texture.png") center top / cover no-repeat fixed;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ✅ 顶部月亮：只露一半（稳定适配不同屏幕） */
+    .moonCrop{
+    /* 月亮显示尺寸：会随屏幕缩放 */
+    --moonSize: clamp(260px, 72vw, 420px);
+    position: relative;
+    width: 100%;
+    /* ✅ 裁切窗高度：约等于月亮的一半（再留一点呼吸） */
+    height: calc(var(--safe-top) + (var(--moonSize) * 0.48));
+    overflow: hidden;
+    pointer-events: none;
+    }
+
+    .moon{
+    position: absolute;
+    left: 50%;
+    width: var(--moonSize);
+    height: auto;
+
+    /* ✅ 把月亮往上抬：让顶部被裁掉，只露下半 */
+    top: calc(var(--safe-top) - (var(--moonSize) * 0.50));
+    transform: translateX(-50%);
+
+    opacity: .95;
+    filter:
+        drop-shadow(0 24px 60px rgba(255,210,140,.20))
+        drop-shadow(0 10px 22px rgba(0,0,0,.35));
+    }
+
+    /* 页面内容容器 */
+    .wrap{
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 10px calc(14px + var(--safe-right)) calc(22px + var(--safe-bottom)) calc(14px + var(--safe-left));
+    }
+
+    /* 标题（如果你想完全“只留画面”也可以删掉整个 title 区块） */
+    .title{
+      text-align: center;
+      margin: 6px 0 18px;
+    }
+    .title h1{
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 1px;
+      color: rgba(255,239,154,.95);
+      text-shadow: 0 10px 35px rgba(0,0,0,.45);
+    }
+    .title p{
+      margin: 8px 0 0;
+      font-size: 12px;
+      color: rgba(255,255,255,.76);
+    }
+
+    /* ✅ 灯笼网格：桌面 4 列（两排四个），手机自动变 2 列更好点按 */
+    .grid{
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: start;
+    }
+    @media (max-width: 560px){
+      .grid{ grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* 灯笼按钮 */
+    .lanternBtn{
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    width: 100%;
+
+    /* ✅ 严格按 lantern-base.png 460×1120 */
+    aspect-ratio: 400 / 930;
+    }
+    .lanternBtn:active{ transform: scale(0.99); }
+
+    .lanternImg{
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
+      filter: drop-shadow(0 18px 30px rgba(0,0,0,.35));
+    }
+
+    /* 菜名叠字区域（你之后可改成竖排/更贴红面区域） */
+    .lanternText{
+      position: absolute;
+      left: 50%;
+      top: 44%;
+      transform: translate(-50%, -50%);
+      width: 58%;
+      max-width: 58%;
+      text-align: center;
+      pointer-events: none;
+    }
+    .lanternText .cn{
+      display: block;
+      font-weight: 800;
+      letter-spacing: .5px;
+      font-size: 14px;
+      color: rgba(255,239,154,.98);
+      text-shadow: 0 10px 26px rgba(0,0,0,.55);
+      word-break: break-all;      /* 中文自动断 */
+      line-height: 1.25;
+    }
+    .lanternText .en{
+      display: block;
+      margin-top: 6px;
+      font-size: 11px;
+      color: rgba(255,255,255,.85);
+      text-shadow: 0 10px 26px rgba(0,0,0,.55);
+      word-break: break-word;
+      overflow-wrap: break-word;
+      line-height: 1.25;
+    }
+
+    /* 底部提示 */
+    .footerHint{
+      margin-top: 16px;
+      text-align: center;
+      color: rgba(255,255,255,.72);
+      font-size: 12px;
+    }
+
+    /* 弹窗 */
+    .modalMask{
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+      padding: 12px 12px calc(12px + var(--safe-bottom));
+    }
+    .modalMask.show{ display: flex; }
+
+    .modal{
+      width: min(560px, 100%);
+      background: linear-gradient(180deg, rgba(30,0,4,.92), rgba(10,0,1,.92));
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: var(--radius);
+      box-shadow: 0 24px 80px rgba(0,0,0,.55);
+      overflow: hidden;
+      max-height: calc(100vh - 24px - var(--safe-top) - var(--safe-bottom));
+      display: flex;
+      flex-direction: column;
+    }
+
+    @supports (height: 100dvh){
+    .modal{
+        max-height: calc(100dvh - 24px - var(--safe-top) - var(--safe-bottom));
+    }
+    }
+
+    .modalHeader{
+      padding: 14px 16px 10px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .dishId{
+      font-size: 12px;
+      color: rgba(255,239,154,.90);
+      letter-spacing: .6px;
+    }
+    .dishCN{
+      font-size: 18px;
+      font-weight: 800;
+      margin-top: 4px;
+      color: rgba(255,255,255,.95);
+    }
+    .dishEN{
+      font-size: 13px;
+      margin-top: 4px;
+      color: rgba(255,255,255,.78);
+    }
+    .closeBtn{
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      flex: 0 0 auto;
+    }
+    .modalBody{
+      padding: 12px 16px 16px;
+      display: grid;
+      gap: 12px;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .metaRow{ display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      color: rgba(255,255,255,.86);
+      font-size: 12px;
+    }
+    .tag strong{ color: rgba(255,239,154,.95); font-weight: 700; }
+    .section{
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .section h3{
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: rgba(255,239,154,.92);
+      letter-spacing: .3px;
+    }
+    .section p, .section ul{
+      margin: 0;
+      color: rgba(255,255,255,.86);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .section ul{ padding-left: 18px; }
+    .section li{ margin: 4px 0; }
+
+    /* 语言显示模式（默认双语；如要加开关后面再加按钮即可） */
+    [data-lang="cn-only"] .en { display: none; }
+    [data-lang="en-only"] .cn { display: none; }
+  </style>
+</head>
+
+<body data-lang="bilingual">
+  <!-- ✅ 月亮：顶部只露一半 -->
+  <header class="moonCrop" aria-hidden="true">
+    <img class="moon" src="moon.png" alt="" />
+  </header>
+
+  <main class="wrap">
+    <div class="title">
+      <h1>灯影食宴 · 元宵聚餐</h1>
+      <h1>Lantern Feast</h1>
+      <p class="cn">点击灯笼查看菜品介绍</p>
+      <p class="en">Tap a lantern to view dish details</p>
+    </div>
+
+    <!-- ✅ 两排四个灯笼 -->
+    <section class="grid" id="grid" aria-label="Lantern menu grid"></section>
+
+    <div class="footerHint cn">建议竖屏打开，点按更顺手 🥢</div>
+    <div class="footerHint en">Best viewed in portrait mode 🥢</div>
+  </main>
+
+  <!-- 弹窗 -->
+  <div class="modalMask" id="modalMask" role="dialog" aria-modal="true" aria-label="Dish details">
+    <div class="modal" role="document">
+      <div class="modalHeader">
+        <div>
+          <div class="dishCN cn" id="mDishCN">菜名</div>
+          <div class="dishEN en" id="mDishEN">Dish name</div>
+        </div>
+        <button class="closeBtn" id="closeBtn" aria-label="Close">×</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="metaRow" id="mTags"></div>
+
+        <div class="section">
+          <h3 class="cn">简介</h3>
+          <h3 class="en">Description</h3>
+          <p class="cn" id="mDescCN"></p>
+          <p class="en" id="mDescEN"></p>
+        </div>
+
+        <div class="section">
+          <h3 class="cn">主要食材</h3>
+          <h3 class="en">Key ingredients</h3>
+          <ul class="cn" id="mIngCN"></ul>
+          <ul class="en" id="mIngEN"></ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dishes = [
+      { cn:"照烧牛排", en:"Teriyaki Steak",
+        tags:[{cn:"热菜",en:"Hot dish"}],
+        desc:{cn:"一口热烈的开场——香气先到，余味回甘。", en:"A bold opening bite—aroma first, with a clean finish."},
+        ingredients:{cn:["照烧酱","牛肉"], en:["teriyaki sauce","beef"]},
+      },
+      { cn:"香菜蘸水", en:"Chinese Cilantro Dipping Sauce",
+        tags:[{cn:"蘸酱",en:"Sauce"}],
+        desc:{cn:"清爽过渡，像灯影掠过汤面。", en:"A refreshing interlude—like lantern light skimming the surface."},
+        ingredients:{cn:["香菜","___"], en:["cilantro"]},
+      },
+      { cn:"贵川烧椒牛油果酱拌皮蛋", en:"Century Egg with Charred Chili and Avocado Guacamole",
+        tags:[{cn:"前菜",en:"Appetizer"}],
+        desc:{cn:"慢火把香气收进汤汁里。", en:"Slow heat concentrates aroma into the sauce."},
+        ingredients:{cn:["番茄","青椒","牛油果","烧椒酱","皮蛋"], en:["tomato","green pepper","avocado","roasted chili sauce","century egg"]},
+      },
+      { cn:"小广梅久灰丸", en:"Plum Ash Dumplings",
+        tags:[{cn:"主食",en:"Staple"}],
+        desc:{cn:"柔软、微甜、带一点烟火气。", en:"Soft, gently sweet, with a whisper of smoky warmth."},
+        ingredients:{cn:["____"], en:["____"]},
+      },
+      { cn:"什千三侯胙菱橘", en:"Citrus & Savory Medley",
+        tags:[{cn:"酸甜",en:"Sweet-tart"}],
+        desc:{cn:"果香把厚重托起来，吃完更想再来一口。", en:"Citrus lifts richness—keeps you reaching for another bite."},
+        ingredients:{cn:["____"], en:["____"]},
+      },
+      { cn:"参才仕少澄桂旨", en:"Ginseng · Osmanthus Clarity",
+        tags:[{cn:"清口",en:"Palette cleanser"}],
+        desc:{cn:"清透收尾，甜香不腻。", en:"A clean finish—floral sweetness without heaviness."},
+        ingredients:{cn:["____"], en:["____"]},
+      },
+      { cn:"昀尽雪土揉戎在", en:"Snow-Soil Fold · Rustic Notes",
+        tags:[{cn:"限定",en:"Special"}],
+        desc:{cn:"带点野趣的香气，越嚼越香。", en:"Rustic aromatics that deepen as you chew."},
+        ingredients:{cn:["____"], en:["____"]},
+      },
+      { cn:"电饺蕾门熟朔花", en:"Glow Dumplings · Blooming Finish",
+        tags:[{cn:"甜品",en:"Dessert"},{cn:"元宵",en:"Tangyuan"}],
+        desc:{cn:"团圆的最后一口：软糯、温热、甜得刚刚好。", en:"The last bite of reunion—soft, warm, and just sweet enough."},
+        ingredients:{cn:["____"], en:["____"]},
+      }
+    ];
+
+    const $ = (sel) => document.querySelector(sel);
+
+    function renderGrid(){
+        const grid = $("#grid");
+        grid.innerHTML = "";
+
+        dishes.forEach((d, idx) => {
+            const btn = document.createElement("button");
+            btn.className = "lanternBtn";
+            btn.type = "button";
+            btn.setAttribute("aria-label", `Open dish ${d.en}`);
+
+            btn.innerHTML = `
+            <img class="lanternImg" src="lantern-base.png" alt="" aria-hidden="true" />
+            <div class="lanternText">
+                <span class="cn">${d.cn}</span>
+                <span class="en">${d.en}</span>
+            </div>
+            `;
+
+            btn.addEventListener("click", () => openDish(idx));
+            grid.appendChild(btn);
+        });
+        }
+
+    const modalMask = $("#modalMask");
+
+    function openDish(index){
+        const dish = dishes[index];
+        if(!dish) return;
+
+        $("#mDishCN").textContent = dish.cn;
+        $("#mDishEN").textContent = dish.en;
+
+        const tags = $("#mTags");
+        tags.innerHTML = "";
+        (dish.tags || []).forEach(t => {
+            const el = document.createElement("div");
+            el.className = "tag";
+            el.innerHTML = `
+            <span class="cn"><strong>·</strong> ${t.cn}</span>
+            <span class="en"><strong>·</strong> ${t.en}</span>
+            `;
+            tags.appendChild(el);
+        });
+
+        $("#mDescCN").textContent = dish.desc?.cn || "";
+        $("#mDescEN").textContent = dish.desc?.en || "";
+
+        const ingCN = $("#mIngCN");
+        const ingEN = $("#mIngEN");
+        ingCN.innerHTML = "";
+        ingEN.innerHTML = "";
+
+        (dish.ingredients?.cn || []).forEach(line => {
+            const li = document.createElement("li");
+            li.textContent = line;
+            ingCN.appendChild(li);
+        });
+        (dish.ingredients?.en || []).forEach(line => {
+            const li = document.createElement("li");
+            li.textContent = line;
+            ingEN.appendChild(li);
+        });
+
+        modalMask.classList.add("show");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeModal(){
+      modalMask.classList.remove("show");
+      document.body.style.overflow = "";
+    }
+
+    $("#closeBtn").addEventListener("click", closeModal);
+    modalMask.addEventListener("click", (e) => { if (e.target === modalMask) closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+    renderGrid();
+  </script>
+</body>
+</html>
