@@ -281,26 +281,6 @@
     [data-lang="cn-only"] .en { display: none; }
     [data-lang="en-only"] .cn { display: none; }
 
-    /* 弹窗里的拍照按钮 */
-    .photoBtn{
-      width: 100%;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.92);
-      padding: 12px 12px;
-      border-radius: 14px;
-      font-size: 13px;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .photoBtn:active{ transform: scale(.99); }
-    .photoNote{
-      margin-top: 10px;
-      color: rgba(255,255,255,.72);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
     /* 全屏相机层 */
     .cameraSheet{
       position: fixed;
@@ -379,6 +359,83 @@
       cursor: pointer;
     }
     .shutter:active{ transform: scale(.98); }
+
+    /* ===== Red & Gold Festival Button ===== */
+    .cameraCTA{
+      width: 100%;
+      padding: 16px 14px;
+      border-radius: 18px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+
+      /* 红色渐变底 */
+      background: linear-gradient(
+        180deg,
+        #7a000f 0%,
+        #4d0008 100%
+      );
+
+      /* 金色边框 */
+      border: 1px solid rgba(255,215,120,.65);
+
+      /* 金色文字 */
+      color: #ffef9a;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 1px;
+      text-align: center;
+
+      /* 光感 */
+      box-shadow:
+        0 14px 40px rgba(0,0,0,.45),
+        inset 0 1px 0 rgba(255,255,255,.08),
+        0 0 18px rgba(255,204,77,.15);
+
+      text-shadow:
+        0 0 10px rgba(255,204,77,.35),
+        0 6px 18px rgba(0,0,0,.45);
+
+      transition: all .15s ease;
+      
+    }
+
+    .cameraCTA span{
+      display: block;
+    }
+
+    .cameraCTA .cn{
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .cameraCTA .en{
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      opacity: .75;
+      letter-spacing: .5px;
+    }
+
+    /* hover 轻微提亮（桌面端） */
+    .cameraCTA:hover{
+      background: linear-gradient(
+        180deg,
+        #8c0013 0%,
+        #5a000a 100%
+      );
+      box-shadow:
+        0 18px 50px rgba(0,0,0,.5),
+        inset 0 1px 0 rgba(255,255,255,.10),
+        0 0 24px rgba(255,204,77,.25);
+    }
+
+    /* 点击反馈 */
+    .cameraCTA:active{
+      transform: scale(.98);
+      box-shadow:
+        0 8px 25px rgba(0,0,0,.45),
+        inset 0 2px 6px rgba(0,0,0,.35);
+    }
   </style>
 </head>
 
@@ -431,18 +488,10 @@
           <ul class="en" id="mIngEN"></ul>
         </div>
 
-        <div class="section">
-          <h3 class="cn">拍照留念</h3>
-          <h3 class="en">Photo</h3>
-
-          <button class="photoBtn" id="openCameraBtn" type="button">
-            <span class="cn">📸 打开相机（带相框）</span>
-            <span class="en">📸 Open camera with frame</span>
-          </button>
-
-          <p class="cn photoNote">提示：需要允许相机权限；iPhone 上会下载图片，或在新页长按保存。</p>
-          <p class="en photoNote">Tip: allow camera permission; on iPhone it downloads, or long-press to save.</p>
-        </div>
+        <button class="cameraCTA" id="openCameraBtn" type="button">
+          <span class="cn">点击拍照·团圆此刻</span>
+          <span class="en">Tap to capture this moment of reunion</span>
+        </button>
 
       </div>
       <!--相机全屏层 -->
@@ -488,8 +537,8 @@
         desc:{cn:"慢火把香气收进汤汁里。", en:"Slow heat concentrates aroma into the sauce."},
         ingredients:{cn:["番茄","青椒","牛油果","烧椒酱","皮蛋"], en:["tomato","green pepper","avocado","roasted chili sauce","century egg"]},
       },
-      { cn:"小广梅久灰丸", en:"Plum Ash Dumplings",
-        tags:[{cn:"主食",en:"Staple"}],
+      { cn:"意式沙拉", en:"Italian Salad",
+        tags:[{cn:"沙拉",en:"Salad"}],
         desc:{cn:"柔软、微甜、带一点烟火气。", en:"Soft, gently sweet, with a whisper of smoky warmth."},
         ingredients:{cn:["____"], en:["____"]},
       },
