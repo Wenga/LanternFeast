@@ -447,8 +447,8 @@
 
   <main class="wrap">
     <div class="title">
-      <h1>灯影食宴 · 元宵聚餐</h1>
-      <h1>Lantern Feast</h1>
+      <h1 class="cn" id="pageTitleCN">灯影食宴 · 元宵聚餐</h1>
+      <h1 class="en" id="pageTitleEN">Lantern Feast</h1>
       <p class="cn">点击灯笼查看菜品介绍</p>
       <p class="en">Tap a lantern to view dish details</p>
     </div>
@@ -566,6 +566,39 @@
 
     const $ = (sel) => document.querySelector(sel);
 
+        // ===== Personalized title by URL suffix =====
+    // 用法：?u=david  或  ?u=iris
+    // 也支持：#david（hash 后缀）
+    function applyPersonalTitle(){
+      const params = new URLSearchParams(location.search);
+      const key = (params.get("u") || params.get("id") || "").trim().toLowerCase()
+              || (location.hash || "").replace("#","").trim().toLowerCase();
+
+      const guests = {
+        david: { cn: "大卫", en: "David" },
+        iris:  { cn: "若", en: "Iris" },
+        jw: { cn: "文", en: "WJ" },
+        lz:   { cn: "露娜", en: "Luna" },
+      };
+
+      const guest = guests[key];
+      if(!guest) return; // 没匹配就保持默认标题
+
+      // 中文标题：名字 · 元宵快乐
+      const titleCN = `${guest.cn} · 元宵快乐`;
+      // 英文标题：Name · Happy Lantern Festival
+      const titleEN = `${guest.en} · Happy Lantern Festival`;
+
+      const elCN = document.querySelector("#pageTitleCN");
+      const elEN = document.querySelector("#pageTitleEN");
+      if(elCN) elCN.textContent = titleCN;
+      if(elEN) elEN.textContent = titleEN;
+
+      // 同时改浏览器 tab 标题
+      document.title = `${guest.en} · Lantern Feast Menu`;
+    }
+
+
     function renderGrid(){
         const grid = $("#grid");
         grid.innerHTML = "";
@@ -642,6 +675,7 @@
     modalMask.addEventListener("click", (e) => { if (e.target === modalMask) closeModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
 
+    applyPersonalTitle();
     renderGrid();
 
       // ===== Camera with frame =====
